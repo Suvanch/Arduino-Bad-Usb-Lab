@@ -1,54 +1,53 @@
 # Arduino BadUSB Lab
 
-A sophisticated security research project utilizing the Arduino Uno R3 as a programmable HID keyboard for automated data exfiltration and credential harvesting.
+A security research project exploring Human Interface Device (HID) keyboard injection, non-volatile data storage (EEPROM), and automated system reconnaissance.
 
 ## Overview
-This lab demonstrates "BadUSB" attacks where a trusted USB device (the Arduino) acts as a keyboard to inject malicious commands. The project features an integrated WiFi credential stealer that identifies target networks, extracts passwords using `netsh`, and stores them in the Arduino's internal EEPROM. It includes a unique **Handshake System** to differentiate between a target machine and the researcher's "Home" computer.
+This lab demonstrates "BadUSB" style attacks using an Arduino Uno R3. When plugged into a target machine, the Arduino identifies itself as a keyboard and executes a high-speed command sequence to extract WiFi profiles and passwords. 
+
+A key feature of this project is the **Handshake System**, which uses a specialized PowerShell script to identify the researcher's "Home" computer, allowing the device to safely dump its collected data instead of attacking the host.
 
 ## Technology Stack
-* [cite_start]**Hardware:** Arduino Uno R3 (ATmega16U2 version). [cite: 59, 154]
+* **Hardware:** Arduino Uno R3.
 * **Firmware:** `Arduino-keyboard-0.3.hex` or `HoodLoader2`.
-* [cite_start]**Language:** C++ (Arduino), PowerShell (Exfiltration), Python (Logging). [cite: 4, 54, 219, 238]
-* [cite_start]**Storage:** Onboard EEPROM (up to 1024 bytes). [cite: 238, 246]
+* **Languages:** C++ (Arduino), PowerShell (Host Handshake), Python (Data Logging).
+* **Storage:** Internal EEPROM (configured for up to 1024 bytes).
 
 ## System Requirements
-* **Host OS:** Windows 10/11 (Target for WiFi extraction commands).
-* **Development OS:** Windows with PowerShell 5.1+.
-* **Firmware Tool:** Atmel FLIP or the HoodLoader2 Installation Sketch.
+* **Target OS:** Windows 10 or 11 (required for the specific `netsh` and `wmic` payloads).
+* **Host OS:** Windows with PowerShell 5.1+ for the authentication signal.
+* **Development Tools:** Arduino IDE 1.8.19 and Atmel FLIP.
 
 ## Installation & Setup
 
 ### 1. Setup HoodLoader2
-For advanced features like the handshake, it is recommended to use the HoodLoader2 firmware:
-1.  [cite_start]Upload `Firmware_HoodLoader2_Installer.ino` (formerly `sketch_may05a.ino`) to your Uno. [cite: 59, 182]
-2.  [cite_start]Follow the serial monitor instructions to flash the 16U2 chip via the 328P. [cite: 184-189]
+For the most robust HID support and dual-serial communication:
+1.  Upload the `Firmware_HoodLoader2_Installer.ino` to your Uno.
+2.  Open the Serial Monitor and follow the prompts to flash the 16U2 chip. This allows the Uno to act as a keyboard while maintaining a serial connection.
 
 ### 2. Upload the Attack Logic
-1.  [cite_start]Open `Final_Integrated_Stealer.ino` (formerly `thescript.ino`) in the Arduino IDE. [cite: 238]
-2.  [cite_start]Configure your `HANDSHAKE` token (default: `SIVAN-PC`). [cite: 239, 241]
-3.  [cite_start]Upload the sketch to your board. [cite: 267]
+1.  Open `Final_Integrated_Stealer.ino` in the Arduino IDE.
+2.  Set your custom `HANDSHAKE` token (default is `SIVAN-PC`).
+3.  Upload the sketch.
 
-### 3. Deploy the Handshake (Home PC)
-1.  [cite_start]Place `PC_Auth_Signal.ps1` (formerly `arduino_handshake.ps1`) on your personal computer. [cite: 54]
-2.  Run the script. [cite_start]It will monitor for the Arduino's Hardware IDs and send the "Home" token automatically. [cite: 55-58]
+### 3. Setup the Home Computer
+1.  Ensure `PC_Auth_Signal.ps1` is on your home machine.
+2.  Run the script. It will sit in the background and wait for the Arduino to be plugged in.
+3.  Once detected, it sends the "Home" signal, triggering the Arduino to dump stored data into Notepad.
 
 ## Functionality & Workflow
-1.  [cite_start]**Plug-in:** Arduino waits for a handshake. [cite: 267]
+1.  **Handshake Check:** On plug-in, the Arduino waits for a specific serial string.
 2.  **Recognition:**
-    * [cite_start]**Home PC:** If `SIVAN-PC` is received, the Arduino opens Notepad and types out all collected WiFi passwords from its EEPROM. [cite: 241, 257, 267]
-    * [cite_start]**Target PC:** If no handshake is found, it opens `cmd`, runs a `wmic`/`netsh` loop to grab credentials, and saves them to the Arduino memory. [cite: 240, 267-268]
+    * **Home PC:** The Arduino recognizes the secret handshake, launches Notepad, and types out all collected WiFi SSIDs and passwords stored in memory.
+    * **Target PC:** If the handshake fails, the Arduino opens a Command Prompt, runs the "Magic Command" to harvest credentials, and saves the output to its EEPROM for later retrieval.
 
 
 
 ## Key Learning Objectives
-* [cite_start]**HID Injection:** Automating keystrokes to interact with the OS shell. [cite: 247-249]
-* [cite_start]**Data Persistence:** Using `EEPROM.update()` and `EEPROM.read()` for non-volatile storage. [cite: 246, 254, 258, 261]
-* [cite_start]**Device Spoofing:** Altering USB descriptors to bypass security prompts. [cite: 59, 240]
-
-## Real-World Applications
-* **Red Teaming:** Simulating physical access attacks during security audits.
-* **Forensics:** Automated collection of system configuration data from locked or air-gapped machines.
+* **HID Injection:** Mastering the timing and execution of automated keystrokes.
+* **Hardware Data Persistence:** Writing and reading from the Arduino's non-volatile EEPROM.
+* **Target Recognition:** Designing logic to prevent "Self-Attacks" using software-to-hardware handshakes.
 
 ## Documentation & Resources
-* [NicoHood/HoodLoader2 GitHub](https://github.com/NicoHood/HoodLoader2)
-* [Atmel FLIP Documentation](https://www.microchip.com/en-us/development-tool/FLIP)
+* [NicoHood/HoodLoader2 Repository](https://github.com/NicoHood/HoodLoader2)
+* [Atmel FLIP Flash Tool](https://www.microchip.com/en-us/development-tool/FLIP)
